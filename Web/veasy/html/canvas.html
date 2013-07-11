@@ -1,0 +1,68 @@
+<html>
+    <head>
+<style>
+html, body {
+  width:  100%;
+  height: 100%;
+  margin: 0px;
+}
+</style>
+        
+<script src="http://cdnjs.cloudflare.com/ajax/libs/ocanvas/2.4.0/ocanvas.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+</head>
+<body>
+	<canvas id="canvas" width="100%" height="100%"></canvas>
+	<script>
+	var c = document.querySelector("#canvas"),
+		ctx = c.getContext("2d");
+	c.width = window.innerWidth;
+	c.height = window.innerHeight;
+    c.addEventListener("touchmove", function (e) { e.preventDefault(); }, false);
+
+    var canvas = oCanvas.create({
+        canvas: "#canvas",
+        background: "#ccc",
+        fps: 20
+    });
+
+    var image = canvas.display.image({
+        width: window.innerWidth,
+        height: window.innerHeight,
+        image: "http://www.colourproduct.com.hk/CNC-machine.JPG"
+    });
+
+    canvas.addChild(image);
+
+    canvas.bind("click tap", function () {
+        draw(canvas.pointer.x, canvas.pointer.y);
+    });
+
+    function draw(x_cord, y_cord) {
+        var arc = canvas.display.arc({
+            x: x_cord,
+            y: y_cord,
+            radius: 25,
+            start: 0,
+            end: 360,
+            stroke: "10px hsl(" + Math.random() * 360 + ", 50%, 50%)"
+        });
+
+        canvas.addChild(arc);
+
+        arc.stop();
+        arc.fadeOut(30000, "ease-in-out-cubic");
+    };
+
+    $(document).ready(function(){
+        $.getJSON("http://10.0.0.3:10083",function(result){
+          $.each(result, function(i, field){
+              draw(field[0], field[1]);
+              //$("div").append(field + " ");
+          });
+        });
+    });
+	</script>
+</body>
+
+</html>
