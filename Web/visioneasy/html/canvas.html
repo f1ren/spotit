@@ -29,36 +29,41 @@ html, body {
     var image = canvas.display.image({
         width: window.innerWidth,
         height: window.innerHeight,
-        image: "http://www.colourproduct.com.hk/CNC-machine.JPG"
+        image: "cnc3.jpg"
     });
 
     canvas.addChild(image);
 
     canvas.bind("click tap", function () {
-        draw(canvas.pointer.x, canvas.pointer.y);
+        var color = draw(canvas.pointer.x, canvas.pointer.y);
+        $.post("../addSpot", {x: canvas.pointer.x / image.width,
+            y: canvas.pointer.y / image.height,
+            color: color});
     });
 
     function draw(x_cord, y_cord) {
+        var color = Math.random() * 360;
         var arc = canvas.display.arc({
             x: x_cord,
             y: y_cord,
             radius: 25,
             start: 0,
             end: 360,
-            stroke: "10px hsl(" + Math.random() * 360 + ", 50%, 50%)"
+            stroke: "10px hsl(" + color + ", 50%, 50%)"
         });
 
         canvas.addChild(arc);
 
         arc.stop();
         arc.fadeOut(30000, "ease-in-out-cubic");
+
+        return color;
     };
 
     $(document).ready(function(){
-        $.getJSON("http://10.0.0.3:10083",function(result){
+        $.getJSON("../getSpots",function(result){
           $.each(result, function(i, field){
               draw(field[0], field[1]);
-              //$("div").append(field + " ");
           });
         });
     });

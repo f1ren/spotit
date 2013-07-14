@@ -17,18 +17,35 @@
 from django.utils import simplejson as json
 
 import webapp2
+import logging
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
+        self.response.out.write("Hello world!")
+
+class SpotsLister(webapp2.RequestHandler):
+    def get(self):
         # TODO Get last timestamp from user
         # TODO Delete old clicks (older than 1 minute)
-        # TODO Get clicks and image for user (by logon information)
+        # TODO Get spots and image for user (by logon information)
         my_response = [(100,100)]
         result = json.dumps(my_response)
-        
+
         self.response.headers.add_header('content-type', 'application/json', charset='utf-8')
         self.response.out.write(result)
 
+class SpotsAdder(webapp2.RequestHandler):
+    def post(self):
+        # TODO get spot from request
+        #  cords
+        #  color
+        # TODO add spot to list
+        logging.info(self.request.get("x"))
+        logging.info(self.request.get("y"))
+        logging.info(self.request.get("color"))
+
 app = webapp2.WSGIApplication([
-    ('/', MainHandler)
+    ('/', MainHandler),
+    ('/getSpots', SpotsLister),
+    ('/addSpot', SpotsAdder),
 ], debug=True)
