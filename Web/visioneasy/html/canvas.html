@@ -35,17 +35,18 @@ html, body {
     canvas.addChild(image);
 
     canvas.bind("click tap", function () {
-        var color = draw(canvas.pointer.x, canvas.pointer.y);
+        var color = Math.random() * 360;
+        draw(canvas.pointer.x / image.width,
+            canvas.pointer.y / image.height, color);
         $.post("../addSpot", {x: canvas.pointer.x / image.width,
             y: canvas.pointer.y / image.height,
             color: color});
     });
 
-    function draw(x_cord, y_cord) {
-        var color = Math.random() * 360;
+    function draw(x_cord, y_cord, color) {
         var arc = canvas.display.arc({
-            x: x_cord,
-            y: y_cord,
+            x: x_cord * image.width,
+            y: y_cord * image.height,
             radius: 25,
             start: 0,
             end: 360,
@@ -63,7 +64,7 @@ html, body {
     $(document).ready(function(){
         $.getJSON("../getSpots",function(result){
           $.each(result, function(i, field){
-              draw(field[0], field[1]);
+              draw(field[0][0], field[0][1], field[1]);
           });
         });
     });

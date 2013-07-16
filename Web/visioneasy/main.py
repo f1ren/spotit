@@ -15,9 +15,11 @@
 # limitations under the License.
 #
 from django.utils import simplejson as json
+from google.appengine.ext import db
 
 import webapp2
 import logging
+from dbModels import *
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
@@ -28,21 +30,27 @@ class SpotsLister(webapp2.RequestHandler):
         # TODO Get last timestamp from user
         # TODO Delete old clicks (older than 1 minute)
         # TODO Get spots and image for user (by logon information)
-        my_response = [(100,100)]
-        result = json.dumps(my_response)
+        spots = db.GqlQuery("SELECT * FROM Spot")
+        spots_list = []
+        for spot in spots:
+            spots_list.append(((spot.x, spot.y), spot.color))
+        result = json.dumps(spots_list)
 
         self.response.headers.add_header('content-type', 'application/json', charset='utf-8')
         self.response.out.write(result)
 
 class SpotsAdder(webapp2.RequestHandler):
     def post(self):
-        # TODO get spot from request
-        #  cords
-        #  color
-        # TODO add spot to list
-        logging.info(self.request.get("x"))
-        logging.info(self.request.get("y"))
-        logging.info(self.request.get("color"))
+        x = float(self.request.get("x"))
+        y = float(self.request.get("y"))
+        color = float(self.request.get("color"))
+        logging.info("New spot at (%f, %f)" % (x, y))
+
+        course = Spot()
+        course.x = x
+        course.y = y
+        course.color = color
+        course.put()
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
