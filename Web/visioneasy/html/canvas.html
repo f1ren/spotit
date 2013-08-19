@@ -48,10 +48,9 @@
     var layer = new Kinetic.Layer();
 
     function draw(x_cord, y_cord, color) {
-        //alert(pos.x + ", " + pos.y + ", " + color);
         var circle = new Kinetic.Circle({
-            x: x_cord,
-            y: y_cord,
+            x: x_cord * stage.getWidth(),
+            y: y_cord * stage.getHeight(),
             radius: 25,
             fill: 'none',
             stroke: "hsl(" + color + ", 50%, 50%)",
@@ -61,7 +60,17 @@
         layer.add(circle);
         stage.add(layer);
         
-        // TODO fade out?
+        var tween = new Kinetic.Tween({
+            node: circle, 
+            duration: 1,
+            opacity: 0,
+        });
+      
+      // start tween after 2 seconds
+      setTimeout(function() {
+        tween.play();
+      }, 10000);
+
 
         return color;
     };
@@ -69,10 +78,21 @@
     function click() {
         var pos  = stage.getMousePosition();
         var color = Math.random() * 360;
-        draw(pos.x, pos.y, color);
+        draw(pos.x / stage.getWidth(), pos.y / stage.getHeight(), color);
+        $.post("../addSpot", {x: pos.x / stage.getWidth(),
+            y: pos.y / stage.getHeight(),
+            color: color});
     }
 
     stage.getContainer().addEventListener('click', function(evt) {click()});
+
+    $(document).ready(function(){
+        $.getJSON("../getSpots",function(result){
+          $.each(result, function(i, field){
+              draw(field[0][0], field[0][1], field[1]);
+          });
+        });
+    });
 	</script>
 </body>
 
