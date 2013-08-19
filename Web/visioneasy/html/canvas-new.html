@@ -1,0 +1,111 @@
+<html>
+    <head>
+<style>
+      body {
+      width:  100%;
+      height: 100%;
+        margin: 0px;
+        padding: 0px;
+      }
+      canvas {
+        border: 1px solid #9C9898;
+      }
+      #tango {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        padding: 10px;
+      }
+      #container {
+        background-image: url("cnc3.jpg");
+        background-size:100% 100%;
+        display: inline-block;
+        overflow: hidden;
+        height: 100%;
+        width: 100%;
+      }
+
+</style>
+        
+<script src="http://d3lp1msu2r81bx.cloudfront.net/kjs/js/lib/kinetic-v4.6.0.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+</head>
+<body>
+	<div id="container"></div>
+	<script>
+    var stage = new Kinetic.Stage({
+        container: 'container',
+        width: window.innerWidth,
+        height: window.innerHeight
+    });
+
+    window.onresize = function(event) {  //this function will resize your stage to the size of your window
+        stage.setWidth(window.innerWidth);
+        stage.setHeight(window.innerHeight);
+        stage.draw(); //redraw the stage, not sure if really needed, but good to have.
+    }
+
+    var layer = new Kinetic.Layer();
+
+    function draw(x_cord, y_cord, color) {
+        var circle = new Kinetic.Circle({
+            x: x_cord * stage.getWidth(),
+            y: y_cord * stage.getHeight(),
+            radius: 25,
+            fill: 'none',
+            stroke: "hsl(" + color + ", 50%, 50%)",
+            strokeWidth: 10,
+            opacity: 0.7
+        });
+
+        layer.add(circle);
+        stage.add(layer);
+        
+        var tween = new Kinetic.Tween({
+            node: circle, 
+            duration: 1,
+            opacity: 0,
+        });
+      
+      // start tween after 2 seconds
+      setTimeout(function() {
+        tween.play();
+      }, 10000);
+
+
+        return color;
+    };
+
+    function click() {
+        var pos  = stage.getMousePosition();
+        var color = Math.random() * 360;
+        draw(pos.x / stage.getWidth(), pos.y / stage.getHeight(), color);
+        $.post("../addSpot", {
+            x: pos.x / stage.getWidth(),
+            y: pos.y / stage.getHeight(),
+            color: color
+        });
+    }
+    
+    function getSpots(){
+        $.getJSON("../getSpots",
+            function(result){
+              $.each(result, 
+                function(i, field){
+                  draw(field[0][0], field[0][1], field[1]);
+                });
+            });
+    }
+
+    stage.getContainer().addEventListener('click', function(evt) {click()});
+    $(document).ready(function(){
+                        getSpots();
+                        setInterval(getSpots,15000); //can be changed later to a number larger than the erase time for spots
+                      });
+
+      
+    //});
+	</script>
+</body>
+
+</html>
